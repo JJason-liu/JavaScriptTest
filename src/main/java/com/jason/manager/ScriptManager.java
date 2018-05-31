@@ -31,7 +31,7 @@ public class ScriptManager {
 	private static ScriptManager instance = new ScriptManager();
 
 	public String outDir = "d:\\javaTest";
-	public String sourceDir = "D:\\eclispData\\";
+	public String sourceDir = "D:\\myjava";
 
 	public static ScriptManager getInstance() {
 		return instance;
@@ -41,7 +41,7 @@ public class ScriptManager {
 	 * 加载Java文件
 	 */
 	public void loadJavaFile(String... source) {
-		// FileUtil.delDirectory(this.outDir);
+		FileUtil.delDirectory(this.outDir);
 		List<File> files = new ArrayList<>();
 		FileUtil.getFiles(sourceDir, ".java", files, fileAbsolutePath -> {
 			for (String s : source) {
@@ -92,7 +92,7 @@ public class ScriptManager {
 				options.add(this.outDir); // 指定输出目录
 
 				ArrayList<File> jarsList = new ArrayList<>();
-				FileUtil.getFiles("D:\\eclispData\\37Game\\target", ".jar", jarsList, null);
+				FileUtil.getFiles(sourceDir + "\\target", ".jar", jarsList, null);
 				String jarString = "";
 				jarString = jarsList.stream().map((jar) -> jar.getPath() + File.pathSeparator).reduce(jarString,
 						String::concat);
@@ -130,6 +130,6 @@ public class ScriptManager {
 	}
 
 	public static void main(String[] args) {
-		ScriptManager.getInstance().loadJavaFile("D:\\eclispData\\");
+		ScriptManager.getInstance().loadJavaFile("D:\\myjava");
 	}
 }
