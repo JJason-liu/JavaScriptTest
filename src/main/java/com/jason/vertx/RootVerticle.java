@@ -52,18 +52,15 @@ public class RootVerticle extends AbstractVerticle {
 					.end(new JsonObject().put("code", 200).put("status", "ok").toString());
 		});
 
-		router.routeWithRegex("/pushservice/*.*/appfeedback*").handler(routingContext -> {
+		// 拦截GM ***********************8
+		router.routeWithRegex("/gmtest").handler(routingContext -> {
 			HttpServerResponse response = routingContext.response();
-			String lpsst = routingContext.request().getParam("lpsst");
-			System.out.println("lpsst get: " + lpsst);
-			String body = routingContext.getBodyAsString();
-			System.out.println(body);
-			response.putHeader("content-type", "text/html").end("<h2>feedback ok!</h2>");
-
+			response.putHeader("content-type", "text/html").end("<h2>receive GM request!!!</h2>");
 		});
-		router.routeWithRegex("/pushservice/*.*/appinfo*").handler(routingContext -> {
+		router.route("/exit").handler(routingContext -> {
 			HttpServerResponse response = routingContext.response();
-			response.putHeader("content-type", "text/html").end("<h2>appinfo ok!</h2>");
+			response.putHeader("content-type", "text/html").end("<h2>exit successs!!!</h2>");
+			System.exit(0);
 		});
 
 		// ::代表这里是引用router的accept方法
