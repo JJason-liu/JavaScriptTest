@@ -1,6 +1,9 @@
 package com.jason.utils;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +55,51 @@ public class FileUtil {
 		return false;
 	}
 
+	public static void getFiles(String path, String type, List<File> filelist, Predicate<String> condition) {
+		File file = new File(path);
+		if (file != null) {
+			String name = file.getName();
+			if (file.isDirectory()) {
+				File[] listFiles = file.listFiles(new FileFilter() {
+
+					@Override
+					public boolean accept(File file) {
+						if (file.isDirectory()) {
+							return true;
+						}
+						return file.getAbsolutePath().endsWith(type);
+					}
+				});
+				for (File file2 : listFiles) {
+					getFiles(file2.getAbsolutePath(), type, filelist, condition);
+				}
+			} else if (condition == null || condition.test(path)) {
+				filelist.add(file);
+				log.error("加载文件:" + name);
+			}
+		}
+	}
+
+	/**
+	 * lambd 表达式一个比较操蛋的语法，感觉就是预先写出一个返回值为boolean类型的逻辑，
+	 * 调用时只需要用.test方法就可以比较该对象是否满足预先写好的条件,就像是个过滤器
+	 * 
+	 * @param str
+	 * @param condition
+	 */
+	public static void testPredicate(String str, Predicate<String> condition) {
+		if (condition.test(str)) {
+			log.error("卧槽，居然是这个语法！！！");
+		}
+	}
+
 	public static void main(String[] args) {
-		FileUtil.delDirectory("C:\\Users\\Administrator.PC-20180420QNNV\\Desktop\\cluster-demo-master");
+		// FileUtil.delDirectory("C:\\Users\\Administrator.PC-20180420QNNV\\Desktop\\cluster-demo-master");
+		FileUtil.testPredicate("不晓得写啥子", s -> {
+			if (s.contains("写啥子")) {
+				return true;
+			}
+			return false;
+		});
 	}
 }
