@@ -31,7 +31,7 @@ public class ScriptManager {
 	private static ScriptManager instance = new ScriptManager();
 
 	public String outDir = "d:\\javaTest";
-	public String sourceDir = "D:\\eclispData\\37Game";
+	public String sourceDir = "D:\\eclispData\\";
 
 	public static ScriptManager getInstance() {
 		return instance;
@@ -130,6 +130,6 @@ public class ScriptManager {
 	}
 
 	public static void main(String[] args) {
-		ScriptManager.getInstance().loadJavaFile("D:\\eclispData\\37Game");
+		ScriptManager.getInstance().loadJavaFile("D:\\eclispData\\");
 	}
 }
