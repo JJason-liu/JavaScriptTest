@@ -74,6 +74,7 @@ public class TestMain {
 		Consumer<Vertx> runner = vertx -> {
 			vertx.deployVerticle("com.jason.vertx.RootVerticle", readOpts);
 			vertx.deployVerticle("com.jason.vertx.PollVerticle", readOpts);
+			vertx.deployVerticle("com.jason.vertx.TestCase", readOpts);
 		};
 
 		if (options.isClustered()) {

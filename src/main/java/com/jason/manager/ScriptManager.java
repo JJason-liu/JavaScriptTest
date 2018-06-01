@@ -15,6 +15,7 @@ import javax.tools.ToolProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.jason.classloader.MyClassLoader;
 import com.jason.utils.FileUtil;
 import com.jason.utils.StringUtil;
 
@@ -29,9 +30,11 @@ public class ScriptManager {
 	private static final Logger log = LogManager.getLogger(ScriptManager.class);
 
 	private static ScriptManager instance = new ScriptManager();
-
-	public String outDir = "d:\\javaTest";
-	public String sourceDir = "D:\\myjava";
+	private String property = System.getProperty("user.dir");
+	private String sourceDir = property + File.separator + "src" + File.separator + "main" + File.separator + "java"
+			+ File.separator;
+	private String outDir = property + File.separator + "target" + File.separator + "scripts" + File.separator;
+	private String jarsDir = property + File.separator + "target" + File.separator; // jar包路径
 
 	public static ScriptManager getInstance() {
 		return instance;
@@ -51,10 +54,31 @@ public class ScriptManager {
 			}
 			return false;
 		});
-		compileFile(files);
+		if (compileFile(files)) {
+			List<File> classFiles = new ArrayList<>();
+			FileUtil.getFiles(outDir, ".class", classFiles, fileAbsolutePath -> {
+				for (String s : source) {
+					if (fileAbsolutePath.contains(s)) {
+						return true;
+					}
+				}
+				return false;
+			});
+			loadClass(classFiles);
+		}
 	}
 
-	private void compileFile(List<File> files) {
+	private void loadClass(List<File> classFiles) {
+		if (classFiles != null && !classFiles.isEmpty()) {
+			for (File file : classFiles) {
+				String fileName = file.getName().replace(outDir, "").replace(".class", "").replace(File.separatorChar,
+						'.');
+				MyClassLoader.getInstance().load(fileName);
+			}
+		}
+	}
+
+	private boolean compileFile(List<File> files) {
 		StringBuilder sb = new StringBuilder();
 		if (null != files) {
 			DiagnosticCollector<JavaFileObject> oDiagnosticCollector = new DiagnosticCollector<>();
@@ -67,7 +91,7 @@ public class ScriptManager {
 				// 没有java文件，直接返回
 				if (files.isEmpty()) {
 					log.error(this.sourceDir + "目录下查找不到任何java文件");
-					return;
+					return false;
 				}
 				log.error("找到需要编译的文件共：" + files.size());
 				// 创建输出目录，如果不存在的话
@@ -92,7 +116,7 @@ public class ScriptManager {
 				options.add(this.outDir); // 指定输出目录
 
 				ArrayList<File> jarsList = new ArrayList<>();
-				FileUtil.getFiles(sourceDir + "\\target", ".jar", jarsList, null);
+				FileUtil.getFiles(jarsDir, ".jar", jarsList, null);
 				String jarString = "";
 				jarString = jarsList.stream().map((jar) -> jar.getPath() + File.pathSeparator).reduce(jarString,
 						String::concat);
@@ -113,7 +137,9 @@ public class ScriptManager {
 						log.error("加载文件错误：" + ((JavaFileObject) (f.getSource())).getName() + " line:"
 								+ f.getLineNumber());
 					});
+					return false;
 				}
+				return true;
 			} catch (Exception ex) {
 				sb.append(this.sourceDir).append("错误：").append(ex);
 				log.error("加载文件错误：", ex);
@@ -127,6 +153,7 @@ public class ScriptManager {
 		} else {
 			log.error(this.sourceDir + "目录下查找不到任何java文件");
 		}
+		return false;
 	}
 
 	public static void main(String[] args) {
