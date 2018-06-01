@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.hazelcast.util.function.Consumer;
 import com.jason.exitnotify.ServerStopNotify;
+import com.jason.manager.ScriptManager;
 import com.jason.utils.StringUtil;
 import com.jason.vertx.optionsReader;
 
@@ -66,9 +67,9 @@ public class TestMain {
 	 */
 	public void initCluster() throws Exception {
 		final VertxOptions options = new VertxOptions();
+		ScriptManager.getInstance().loadJavaFile("D:\\MyEclipsTestProgame\\JavaScriptTest");
 		// 设置参数，启用集群
 		options.setClustered(true);
-
 		DeploymentOptions readOpts = optionsReader.readOpts();
 
 		Consumer<Vertx> runner = vertx -> {

@@ -15,6 +15,7 @@ import javax.tools.ToolProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.jason.Interface.IScript;
 import com.jason.classloader.MyClassLoader;
 import com.jason.utils.FileUtil;
 import com.jason.utils.StringUtil;
@@ -36,14 +37,19 @@ public class ScriptManager {
 	private String outDir = property + File.separator + "target" + File.separator + "scripts" + File.separator;
 	private String jarsDir = property + File.separator + "target" + File.separator; // jar包路径
 
+	private List<IScript> pool = new ArrayList<>();
+
 	public static ScriptManager getInstance() {
 		return instance;
 	}
 
 	/**
 	 * 加载Java文件
+	 * 
+	 * @throws ClassNotFoundException
 	 */
-	public void loadJavaFile(String... source) {
+	public void loadJavaFile(String... source) throws ClassNotFoundException {
+		pool.clear();
 		FileUtil.delDirectory(this.outDir);
 		List<File> files = new ArrayList<>();
 		FileUtil.getFiles(sourceDir, ".java", files, fileAbsolutePath -> {
@@ -68,12 +74,22 @@ public class ScriptManager {
 		}
 	}
 
-	private void loadClass(List<File> classFiles) {
+	private void loadClass(List<File> classFiles) throws ClassNotFoundException {
 		if (classFiles != null && !classFiles.isEmpty()) {
 			for (File file : classFiles) {
-				String fileName = file.getName().replace(outDir, "").replace(".class", "").replace(File.separatorChar,
+				String fileName = file.getPath().replace(outDir, "").replace(".class", "").replace(File.separatorChar,
 						'.');
-				MyClassLoader.getInstance().load(fileName);
+				Class<?> loadClass = MyClassLoader.getInstance().loadClass(fileName);
+				if (IScript.class.isAssignableFrom(loadClass) && !loadClass.isInterface()) {
+					try {
+						pool.add((IScript) loadClass.newInstance());
+						log.error("添加文件" + loadClass.getName() + pool.size());
+					} catch (InstantiationException | IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				log.error("加载类" + fileName);
 			}
 		}
 	}
@@ -156,7 +172,15 @@ public class ScriptManager {
 		return false;
 	}
 
-	public static void main(String[] args) {
-		ScriptManager.getInstance().loadJavaFile("D:\\myjava");
+	public List<IScript> getPool() {
+		return pool;
+	}
+
+	public void setPool(List<IScript> pool) {
+		this.pool = pool;
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		ScriptManager.getInstance().loadJavaFile("D:\\MyEclipsTestProgame\\JavaScriptTest");
 	}
 }

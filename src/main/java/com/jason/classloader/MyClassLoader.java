@@ -1,6 +1,7 @@
 package com.jason.classloader;
 
-import com.jason.utils.StringUtil;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MyClassLoader extends ClassLoader {
 
@@ -10,15 +11,30 @@ public class MyClassLoader extends ClassLoader {
 		return instance;
 	}
 
-	public Class load(String fileName) {
-		if (!StringUtil.isEmpty(fileName)) {
-			try {
-				return super.loadClass(fileName);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		try {
+			// 这个getClassInputStream根据情况实现
+			String filename = name.replace('.', '/') + ".class";
+
+			InputStream is = getClass().getResourceAsStream(filename);
+
+			if (is == null) {
+				return super.loadClass(name);
 			}
+			byte[] bt = new byte[is.available()];
+			is.read(bt);
+			return defineClass(name, bt, 0, bt.length);
+		} catch (IOException e) {
+			throw new ClassNotFoundException("Class " + name + " not found.");
 		}
-		return null;
+	}
+
+	@Override
+	protected Class<?> findClass(String name) {
+		System.out.println("代用");
+		Class<?> defineClass = null;
+		return defineClass;
 	}
 
 }

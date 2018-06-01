@@ -57,7 +57,12 @@ public class RootVerticle extends AbstractVerticle {
 		// 拦截GM ***********************8
 		router.routeWithRegex("/refreshScript").handler(routingContext -> {
 			HttpServerResponse response = routingContext.response();
-			ScriptManager.getInstance().loadJavaFile("D:\\MyEclipsTestProgame\\JavaScriptTest");
+			try {
+				ScriptManager.getInstance().loadJavaFile("D:\\MyEclipsTestProgame\\JavaScriptTest");
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			response.putHeader("content-type", "text/html").end("<h2>receive GM request!!!</h2>");
 		});
 		router.route("/exit").handler(routingContext -> {
